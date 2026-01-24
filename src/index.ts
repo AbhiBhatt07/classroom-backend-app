@@ -7,6 +7,7 @@ const PORT = 8000;
 
 app.use(express.json())
 
+// enable cors for frontend app
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   methods: ["GET", "POST", "PATCH", "DELETE"],
