@@ -2,6 +2,7 @@ import { and, desc, eq, getTableColumns, ilike, or, sql } from "drizzle-orm";
 import express from "express";
 import { departments, subjects } from "../db/schema";
 import { db } from "../db";
+import { parse } from "node:path";
 
 const router = express.Router();
 
@@ -12,8 +13,8 @@ router.get("/", async (req, res) => {
     const { search, department, page = 1, limit = 10 } = req.query;
 
     // Normalize pagination values
-    const currentPage = Math.max(1, +page);
-    const limitPerPage = Math.max(1, +limit);
+    const currentPage = Math.max(1, parseInt(String(page), 10) || 1); 
+    const limitPerPage = Math.min(Math.max(1, parseInt(String(limit), 10) || 10), 100);
 
     // Collect dynamic filter conditions
     const filterConditions = [];
@@ -28,11 +29,11 @@ router.get("/", async (req, res) => {
       );
     }
 
-    // Filter by department name
+    // if department filter exists, match department  name 
+    // to prevent SQL injection is use parameterized query instead of string concat 
     if (department) {
-      filterConditions.push(
-        ilike(departments.name, `%${department}%`)
-      );
+      const deptPattern = `%${String(department).replace(/[%_]/g, "\\$&")}%`;
+      filterConditions.push(ilike(departments.name, deptPattern));
     }
 
     // Combine filters if any exist

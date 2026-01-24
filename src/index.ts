@@ -7,6 +7,10 @@ const PORT = 8000;
 
 app.use(express.json())
 
+if (!process.env.FRONTEND_URL) {
+  throw new Error('Fontend URL is not set in .env file');
+}
+// enable cors for frontend app
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   methods: ["GET", "POST", "PATCH", "DELETE"],
