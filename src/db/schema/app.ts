@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
-import { timestamp } from "drizzle-orm/gel-core";
-import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
 
-const timeStamp = {
-  createAt: timestamp("created_at").defaultNow().notNull(),
+const timestamps = {
+  createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()).notNull(),
-}
+};
+
 
 // Tables 
 export const departments = pgTable("departments", {
@@ -14,7 +14,7 @@ export const departments = pgTable("departments", {
   code: varchar("code", {length: 50}).notNull().unique(),
   name: varchar("name", {length:255}).notNull(),
   description: varchar("description", {length:255}),
-
+  ...timestamps
 })
 
 export const subjects = pgTable("subjects", {
@@ -23,7 +23,7 @@ export const subjects = pgTable("subjects", {
   name: varchar("name", {length:255}).notNull(),
   code: varchar("code", {length: 50}).notNull().unique(),
   description: varchar("description", {length:255}),
-
+  ...timestamps
 })
 
 // Relation between departments and subjects using many to many 
