@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import aj from "../config/arcjet";
-import { ArcjetNodeRequest, slidingWindow } from "@arcjet/node";
+import type { ArcjetNodeRequest } from "@arcjet/node";
+import { slidingWindow} from "@arcjet/node";
 import { RateLimitRole } from "../type";
 
 const securityMiddleware = async (
@@ -49,7 +50,7 @@ const securityMiddleware = async (
    socket: { remoteAddress: req.socket.remoteAddress ?? req.ip ?? "0.0.0.0" },
   };
 
-  const decision = await client.protect(req);
+  const decision = await client.protect(arcjetRequest);
 
   if (decision.isDenied() && decision.reason.isBot()) {
    return res
