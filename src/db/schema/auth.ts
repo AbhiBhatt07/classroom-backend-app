@@ -1,5 +1,13 @@
 import { relations } from "drizzle-orm";
-import { pgEnum, pgTable, timestamp, text, boolean, index  } from "drizzle-orm/pg-core";
+import {
+ pgEnum,
+ pgTable,
+ timestamp,
+ text,
+ boolean,
+ index,
+ unique,
+} from "drizzle-orm/pg-core";
 
 // Role enum
 export const roleEnum = pgEnum("role", ["student", "teacher", "admin"]);
@@ -68,39 +76,50 @@ export const account = pgTable(
    .$onUpdate(() => new Date())
    .notNull(),
  },
- (table) => [index("account_user_id_idx").on(table.userId)],
+ (table) => [
+  index("account_user_id_idx").on(table.userId),
+  unique("account_provider_account_id_unique").on(
+   table.providerId,
+   table.accountId,
+  ),
+ ],
 );
 
 // VerificationToken table
-export const verification = pgTable("verification", {
- id: text("id").primaryKey(),
- identifier: text("identifier").notNull(),
- value: text("value").notNull(),
- expiresAt: timestamp("expires_at").notNull(),
- createdAt: timestamp("created_at").defaultNow().notNull(),
- updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()).notNull(),
-}, (table) => [
-  index("verification_identifier_idx").on(table.identifier),
-]);
+export const verification = pgTable(
+ "verification",
+ {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+   .defaultNow()
+   .$onUpdate(() => new Date())
+   .notNull(),
+ },
+ (table) => [index("verification_identifier_idx").on(table.identifier)],
+);
 
-export const userRelations = relations(user, ({many}) => ({
-  session: many(session),
-  account: many(account),
-}))
+export const userRelations = relations(user, ({ many }) => ({
+ session: many(session),
+ account: many(account),
+}));
 
-export const sessionRelations = relations(session, ({one}) => ({
-  user: one(user, {
-    fields: [session.userId],
-    references: [user.id],
-  }),
-}))
+export const sessionRelations = relations(session, ({ one }) => ({
+ user: one(user, {
+  fields: [session.userId],
+  references: [user.id],
+ }),
+}));
 
-export const accountRelations = relations(account, ({one}) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id],
-  }),
-}))
+export const accountRelations = relations(account, ({ one }) => ({
+ user: one(user, {
+  fields: [account.userId],
+  references: [user.id],
+ }),
+}));
 
 export type User = typeof user.$inferSelect;
 export type NewUser = typeof user.$inferInsert;
@@ -113,4 +132,3 @@ export type NewAccount = typeof account.$inferInsert;
 
 export type Verification = typeof verification.$inferSelect;
 export type NewVerification = typeof verification.$inferInsert;
-
