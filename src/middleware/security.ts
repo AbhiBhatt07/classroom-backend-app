@@ -18,18 +18,18 @@ const securityMiddleware = async (
 
   switch (role) {
    case "admin":
-    limit: 2;
-    message: "You can only make 2 requests per minute. It's slow down";
+    limit = 2;
+    message =  "You can only make 2 requests per minute. It's slow down";
     break;
 
    case "teacher":
    case "student":
     limit = 10;
-    message: "User request limit exceeded (10 per minute). Please wait";
+    message =  "User request limit exceeded (10 per minute). Please wait";
 
    default:
     limit = 5;
-    message: "Guest limit exceeded (5 per minute). Please signup for higher limits.";
+    message =  "Guest limit exceeded (5 per minute). Please signup for higher limits.";
   }
 
   // create arcjet client for this request
@@ -49,7 +49,7 @@ const securityMiddleware = async (
    socket: { remoteAddress: req.socket.remoteAddress ?? req.ip ?? "0.0.0.0" },
   };
 
-  const decision = await client.protect(arcjetRequest);
+  const decision = await client.protect(req);
 
   if (decision.isDenied() && decision.reason.isBot()) {
    return res
@@ -68,10 +68,10 @@ const securityMiddleware = async (
 
   next();
  } catch (error) {
-  console.log("Arcjet middleware error", error);
+  console.error("Arcjet middleware error", error);
   res.status(500).json({
    error: "Internal Error",
-   message: "Someting went worng with securiy middleware ",
+   message: "Something went wrong with security middleware",
   });
  }
 };
