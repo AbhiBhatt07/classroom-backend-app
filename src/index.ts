@@ -17,7 +17,7 @@ app.use(cors({
   credentials: true
 }))
 
-app.use("/api/subject", subjectRouter)
+app.use("/api/subjects", subjectRouter)
 
 app.get("/", (req, res) => {
   res.send("Welcome the subject API route")
